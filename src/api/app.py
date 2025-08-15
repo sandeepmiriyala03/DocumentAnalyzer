@@ -9,13 +9,14 @@ from AllTypes import process_file  # Ensure this file is in your project
 
 app = FastAPI()
 
-# Enable CORS for frontend URLs
+# Enable CORS for frontend URLs including your Vercel deployment
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "http://192.168.0.103:3000",  # Add your LAN IP here if accessing remotely
+        "http://192.168.0.103:3000",  # Add your LAN IP if needed
+        "https://documentanalyzer-beta.vercel.app",  # Your Vercel frontend URL
     ],
     allow_credentials=True,
     allow_methods=["*"],
