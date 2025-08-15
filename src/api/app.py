@@ -29,10 +29,10 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 @app.get("/")
 def root():
     return {
-        "message": "FastAPI PDF Analyzer API is running. Use POST /upload or /test-upload to send files."
+        "message": "FastAPI PDF Analyzer API is running. Use POST /api/upload or /api/test-upload to send files."
     }
 
-@app.post("/test-upload")
+@app.post("/api/test-upload")
 async def test_upload(file: UploadFile = File(...)):
     if file:
         return {
@@ -42,7 +42,7 @@ async def test_upload(file: UploadFile = File(...)):
         }
     return {"error": "No file received"}
 
-@app.post("/upload")
+@app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     try:
         file_location = os.path.join(UPLOAD_DIR, file.filename)

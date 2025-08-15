@@ -13,7 +13,6 @@ interface Result {
   analysis: Analysis[];
 }
 
-// Type guard for error response
 function isErrorResponse(data: unknown): data is { error: string } {
   return (
     typeof data === "object" &&
@@ -31,10 +30,10 @@ export default function Home() {
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]); // Correctly set single file
+      setFile(e.target.files[0]); // <-- Store single File, not FileList!
       setError("");
       setResult(null);
-      console.log("File selected:", e.target.files[0]);
+      console.log("File selected:", e.target.files);
     }
   };
 
@@ -43,17 +42,18 @@ export default function Home() {
       setError("Please select a file first");
       return;
     }
-
     setLoading(true);
     setError("");
     try {
       const formData = new FormData();
-      formData.append("file", file); // key 'file' must match backend parameter
+      formData.append("file", file); // KEY MUST BE "file"
 
-      const res = await fetch("http://127.0.0.1:8000/upload", {
+      // If local, use your backend base URL, otherwise empty for relative path in production
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+      const res = await fetch(`${baseUrl}/api/upload`, {
         method: "POST",
         body: formData,
-        // Do NOT set Content-Type header manually
       });
 
       const data = await res.json();
@@ -66,7 +66,6 @@ export default function Home() {
         }
         return;
       }
-
       setResult(data as Result);
     } catch (err) {
       if (err instanceof Error) {
@@ -80,8 +79,17 @@ export default function Home() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: "50px auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
-      <h1 style={{ textAlign: "center", color: "#333", marginBottom: 20 }}>Upload Document</h1>
+    <div
+      style={{
+        maxWidth: 600,
+        margin: "50px auto",
+        padding: 20,
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <h1 style={{ textAlign: "center", color: "#333", marginBottom: 20 }}>
+        Upload Document
+      </h1>
 
       <input
         type="file"
@@ -107,17 +115,31 @@ export default function Home() {
         {loading ? "Uploading..." : "Upload"}
       </button>
 
-      {error && <p style={{ color: "red", fontWeight: "bold", textAlign: "center", marginTop: 20 }}>{error}</p>}
+      {error && (
+        <p
+          style={{
+            color: "red",
+            fontWeight: "bold",
+            textAlign: "center",
+            marginTop: 20,
+          }}
+        >
+          {error}
+        </p>
+      )}
 
       {result && result.analysis && result.analysis.length > 0 && (
         <div
           style={{
             marginTop: 30,
             padding: 24,
-            background: "linear-gradient(135deg, #f0f4ff 25%, #d9e4ff 100%)",
+            background:
+              "linear-gradient(135deg, #f0f4ff 25%, #d9e4ff 100%)",
             borderRadius: 16,
-            boxShadow: "0 12px 30px rgba(0, 70, 255, 0.15), inset 0 0 10px rgba(0, 70, 255, 0.1)",
-            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+            boxShadow:
+              "0 12px 30px rgba(0, 70, 255, 0.15), inset 0 0 10px rgba(0, 70, 255, 0.1)",
+            fontFamily:
+              "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
             fontSize: 16,
             color: "#102a8f",
             lineHeight: 1.6,
@@ -129,7 +151,9 @@ export default function Home() {
         >
           {result.analysis[0].highlights && (
             <div style={{ marginBottom: 24 }}>
-              <h2 style={{ marginBottom: 12, color: "#0050ab" }}>Highlights</h2>
+              <h2 style={{ marginBottom: 12, color: "#0050ab" }}>
+                Highlights
+              </h2>
               <ul style={{ paddingLeft: 20, margin: 0, color: "#102a8f" }}>
                 {result.analysis[0].highlights.map((highlight, index) => (
                   <li key={index} style={{ marginBottom: 8 }}>
